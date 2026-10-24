@@ -54,3 +54,33 @@ export function getIndicators(state) {
     totalAmount: totalAmount
   };
 }
+
+export function getCategories(products) {
+  const categories = [];
+  products.forEach(p => {
+    if (!categories.includes(p.category)) {
+      categories.push(p.category);
+    }
+  });
+  return categories;
+}
+
+export function filterOrders(state) {
+  const search = state.search.trim().toLowerCase();
+
+  return state.orders.filter(order => {
+    const customer = getCustomer(state.customers, order.customerId);
+    const customerName = customer ? customer.name.toLowerCase() : "";
+
+    const matchSearch = customerName.includes(search);
+    const matchStatus = state.status === "" || order.status === state.status;
+    const matchCategory =
+      state.category === "" ||
+      order.items.some(item => {
+        const product = getProduct(state.products, item.productId);
+        return product && product.category === state.category;
+      });
+
+    return matchSearch && matchStatus && matchCategory;
+  });
+}
